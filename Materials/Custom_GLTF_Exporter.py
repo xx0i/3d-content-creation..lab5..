@@ -46,7 +46,6 @@ def export_data(filepath):
     bpy.ops.export_scene.gltf(filepath=filepath, 
         export_format='GLTF_SEPARATE', # GLB is faster, but GLTF is easier to debug
         use_selection=bool(bpy.context.selected_objects),
-        export_colors=False,
         export_tangents=True,
         #export_use_gltfpack=True, # Appears to be not ready for prime time yet
         #export_gltfpack_tc=True, # Enable this when export_use_gltfpack is ready (KTX Support)
