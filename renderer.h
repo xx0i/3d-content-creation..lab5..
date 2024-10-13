@@ -1,3 +1,8 @@
+#define TINYGLTF_IMPLEMENTATION //needed for linking tinyGLTF
+#define	STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../TinyGLTF/tiny_gltf.h"
+
 #include "shaderc/shaderc.h" // needed for compiling shaders at runtime
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 	#pragma comment(lib, "shaderc_combined.lib") 
