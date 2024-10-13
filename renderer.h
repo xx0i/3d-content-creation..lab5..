@@ -90,13 +90,13 @@ public:
 				}
 			}
 
-			printf("Number of buffers: %zu\n", model.buffers.size());
+			printf("\nNumber of buffers: %zu\n", model.buffers.size());
 			for (const auto& buffer : model.buffers) {
 				printf("Buffer URI: %s\n", buffer.uri.c_str());
 			}
 
 			// Print buffer views
-			printf("Number of buffer views: %zu\n", model.bufferViews.size());
+			printf("\nNumber of buffer views: %zu\n", model.bufferViews.size());
 			for (const auto& bufferView : model.bufferViews) {
 				printf("Buffer view:\n");
 				printf("  Buffer: %d\n", bufferView.buffer);
