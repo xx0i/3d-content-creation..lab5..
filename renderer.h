@@ -301,7 +301,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(float) * 2;
+		retval.stride = sizeof(float) * 3;
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
@@ -495,7 +495,7 @@ private:
 			const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
 
 			// Bind the vertex buffer using the offset
-			VkDeviceSize offsets[1] = { bufferView.byteOffset };
+			VkDeviceSize offsets[] = { bufferView.byteOffset };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 		}
 	}
@@ -531,13 +531,6 @@ private:
 		VkRect2D scissor = CreateScissorFromWindowDimensions();
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
-
-	void BindVertexBuffers(VkCommandBuffer& commandBuffer)
-	{
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
-	}
-
 
 	void CleanUp()
 	{
