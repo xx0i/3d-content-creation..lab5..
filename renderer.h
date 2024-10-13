@@ -5,7 +5,7 @@
 
 #include "shaderc/shaderc.h" // needed for compiling shaders at runtime
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
-	#pragma comment(lib, "shaderc_combined.lib") 
+#pragma comment(lib, "shaderc_combined.lib") 
 #endif
 
 void PrintLabeledDebugString(const char* label, const char* toPrint)
@@ -23,7 +23,7 @@ class Renderer
 	GW::SYSTEM::GWindow win;
 	GW::GRAPHICS::GVulkanSurface vlk;
 	GW::CORE::GEventReceiver shutdown;
-	
+
 	// what we need at a minimum to draw a triangle
 	VkDevice device = nullptr;
 	VkPhysicalDevice physicalDevice = nullptr;
@@ -53,7 +53,7 @@ public:
 		InitializeGraphics();
 		BindShutdownCallback();
 		loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle.gltf");
-			
+
 	}
 
 	void loadingRudimentaryfromGltf(std::string filepath)
@@ -71,6 +71,24 @@ public:
 
 		if (!ret) {
 			printf("Failed to parse glTF\n");
+		}
+		else if (ret)
+		{
+			printf("Successfully loaded glTF: %s\n", filepath.c_str());
+
+			// Print number of meshes
+			printf("Number of meshes: %zu\n", model.meshes.size());
+			for (const auto& mesh : model.meshes) {
+				printf("Mesh name: %s\n", mesh.name.c_str());
+				printf("Number of primitives: %zu\n", mesh.primitives.size());
+
+				for (const auto& primitive : mesh.primitives) {
+					// Print attributes
+					for (const auto& attribute : primitive.attributes) {
+						printf("Attribute: %s\n", attribute.first.c_str());
+					}
+				}
+			}
 		}
 	}
 
@@ -98,7 +116,7 @@ private:
 
 	void InitializeVertexBuffer()
 	{
-		float verts[] = 
+		float verts[] =
 		{
 			0,   0.5f,
 			0.5f, -0.5f,
@@ -139,7 +157,7 @@ private:
 #ifndef NDEBUG
 		shaderc_compile_options_set_generate_debug_info(retval);
 #endif
-		return retval;	
+		return retval;
 	}
 
 	void CompileVertexShader(const shaderc_compiler_t& compiler, const shaderc_compile_options_t& options)
@@ -149,26 +167,26 @@ private:
 		shaderc_compilation_result_t result = shaderc_compile_into_spv( // compile
 			compiler, vertexShaderSource.c_str(), vertexShaderSource.length(),
 			shaderc_vertex_shader, "main.vert", "main", options);
-		
+
 		if (shaderc_result_get_compilation_status(result) != shaderc_compilation_status_success) // errors?
 		{
 			PrintLabeledDebugString("Vertex Shader Errors:\n", shaderc_result_get_error_message(result));
 			abort();
 			return;
 		}
-		
+
 		GvkHelper::create_shader_module(device, shaderc_result_get_length(result), // load into Vulkan
 			(char*)shaderc_result_get_bytes(result), &vertexShader);
-		
+
 		shaderc_result_release(result); // done
 	}
-	
+
 	void CompilePixelShader(const shaderc_compiler_t& compiler, const shaderc_compile_options_t& options)
 	{
 		std::string fragmentShaderSource = ReadFileIntoString("../FragmentShader.hlsl");
-		
+
 		shaderc_compilation_result_t result;
-		
+
 		result = shaderc_compile_into_spv( // compile
 			compiler, fragmentShaderSource.c_str(), fragmentShaderSource.length(),
 			shaderc_fragment_shader, "main.frag", "main", options);
@@ -179,10 +197,10 @@ private:
 			abort();
 			return;
 		}
-		
+
 		GvkHelper::create_shader_module(device, shaderc_result_get_length(result), // load into Vulkan
 			(char*)shaderc_result_get_bytes(result), &fragmentShader);
-		
+
 		shaderc_result_release(result); // done
 	}
 
@@ -213,7 +231,7 @@ private:
 
 		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description, 1);
 		VkViewport viewport = CreateViewportFromWindowDimensions();
-		VkRect2D scissor = CreateScissorFromWindowDimensions(); 
+		VkRect2D scissor = CreateScissorFromWindowDimensions();
 		VkPipelineViewportStateCreateInfo viewport_create_info = CreateVkPipelineViewportStateCreateInfo(&viewport, 1, &scissor, 1);
 		VkPipelineRasterizationStateCreateInfo rasterization_create_info = CreateVkPipelineRasterizationStateCreateInfo();
 		VkPipelineMultisampleStateCreateInfo multisample_create_info = CreateVkPipelineMultisampleStateCreateInfo();
@@ -222,10 +240,10 @@ private:
 		VkPipelineColorBlendStateCreateInfo color_blend_create_info = CreateVkPipelineColorBlendStateCreateInfo(&color_blend_attachment_state, 1);
 
 		// Dynamic State 
-		VkDynamicState dynamic_states[2] = 
+		VkDynamicState dynamic_states[2] =
 		{
 			// By setting these we do not need to re-create the pipeline on Resize
-			VK_DYNAMIC_STATE_VIEWPORT, 
+			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR
 		};
 		VkPipelineDynamicStateCreateInfo dynamic_create_info = CreateVkPipelineDynamicStateCreateInfo(dynamic_states, 2);
@@ -409,7 +427,7 @@ private:
 		pipeline_layout_create_info.pushConstantRangeCount = 0;
 		pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
-		vkCreatePipelineLayout(device, &pipeline_layout_create_info,nullptr, &pipelineLayout);
+		vkCreatePipelineLayout(device, &pipeline_layout_create_info, nullptr, &pipelineLayout);
 	}
 
 	void BindShutdownCallback()
