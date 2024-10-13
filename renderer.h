@@ -1,4 +1,3 @@
-// TODO: Part 1b
 #include "shaderc/shaderc.h" // needed for compiling shaders at runtime
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 	#pragma comment(lib, "shaderc_combined.lib") 
@@ -15,9 +14,6 @@ void PrintLabeledDebugString(const char* label, const char* toPrint)
 
 class Renderer
 {
-	// TODO: Part 2b
-	// TODO: Part 3a
-	
 	// proxy handles
 	GW::SYSTEM::GWindow win;
 	GW::GRAPHICS::GVulkanSurface vlk;
@@ -29,20 +25,13 @@ class Renderer
 	VkRenderPass renderPass;
 	VkBuffer vertexHandle = nullptr;
 	VkDeviceMemory vertexData = nullptr;
-	// TODO: Part 1g
-	// TODO: Part 2c
 	VkShaderModule vertexShader = nullptr;
 	VkShaderModule fragmentShader = nullptr;
 	// pipeline settings for drawing (also required)
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
-	// TODO: Part 2d
-	// TODO: Part 3d
 	unsigned int windowWidth, windowHeight;
 
-	// TODO: Part 2a
-	// TODO: Part 2b // TODO: Part 4d
-	// TODO: Part 3a
 public:
 
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
@@ -50,11 +39,6 @@ public:
 		win = _win;
 		vlk = _vlk;
 		UpdateWindowDimensions();
-
-		// TODO: Part 2a
-		// TODO: Part 2b // TODO: Part 4d
-		// TODO: part 3a
-
 		InitializeGraphics();
 		BindShutdownCallback();
 	}
@@ -70,8 +54,6 @@ private:
 	{
 		GetHandlesFromSurface();
 		InitializeVertexBuffer();
-		// TODO: Part 1g
-		// TODO: Part 2d // TODO: Part 3d
 		CompileShaders();
 		InitializeGraphicsPipeline();
 	}
@@ -85,7 +67,6 @@ private:
 
 	void InitializeVertexBuffer()
 	{
-		// TODO: Part 1c
 		float verts[] = 
 		{
 			0,   0.5f,
@@ -123,7 +104,7 @@ private:
 	{
 		shaderc_compile_options_t retval = shaderc_compile_options_initialize();
 		shaderc_compile_options_set_source_language(retval, shaderc_source_language_hlsl);
-		shaderc_compile_options_set_invert_y(retval, true); // TODO: Part 2g
+		shaderc_compile_options_set_invert_y(retval, true);
 #ifndef NDEBUG
 		shaderc_compile_options_set_generate_debug_info(retval);
 #endif
@@ -252,7 +233,6 @@ private:
 
 	VkVertexInputBindingDescription CreateVkVertexInputBindingDescription()
 	{
-		// TODO: Part 1e
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
 		retval.stride = sizeof(float) * 2;
@@ -391,7 +371,6 @@ private:
 	void CreatePipelineLayout()
 	{
 		// Descriptor pipeline layout
-		// TODO: Part 2d // TODO: Part 3d
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_create_info.setLayoutCount = 0;
@@ -416,15 +395,9 @@ private:
 public:
 	void Render()
 	{
-		// TODO: Part 3i
-		// TODO: Part 2a
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
-		// TODO: Part 3i
-		// TODO: Part 1h
-		// TODO: Part 2e
-		// TODO: Part 3f
-		vkCmdDraw(commandBuffer, 3, 1, 0, 0); // TODO: Part 1d
+		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 	}
 
 private:
@@ -472,9 +445,6 @@ private:
 		// wait till everything has completed
 		vkDeviceWaitIdle(device);
 		// Release allocated buffers, shaders & pipeline
-		// TODO: Part 1g
-		// TODO: Part 2d
-		// TODO: Part 3d
 		vkDestroyBuffer(device, vertexHandle, nullptr);
 		vkFreeMemory(device, vertexData, nullptr);
 		vkDestroyShaderModule(device, vertexShader, nullptr);
