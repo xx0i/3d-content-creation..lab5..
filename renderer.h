@@ -28,8 +28,8 @@ class Renderer
 	VkDevice device = nullptr;
 	VkPhysicalDevice physicalDevice = nullptr;
 	VkRenderPass renderPass;
-	VkBuffer geometryHandle = nullptr;
-	VkDeviceMemory geometryData = nullptr;
+	VkBuffer vertexHandle = nullptr;
+	VkDeviceMemory vertexData = nullptr;
 	VkShaderModule vertexShader = nullptr;
 	VkShaderModule fragmentShader = nullptr;
 	// pipeline settings for drawing (also required)
@@ -119,7 +119,7 @@ private:
 	void InitializeGraphics()
 	{
 		GetHandlesFromSurface();
-		InitializeGeometryBuffer();
+		InitializeVertexBuffer();
 		CompileShaders();
 		InitializeGraphicsPipeline();
 	}
@@ -131,7 +131,7 @@ private:
 		vlk.GetRenderPass((void**)&renderPass);
 	}
 
-	void InitializeGeometryBuffer()
+	void InitializeVertexBuffer()
 	{
 		float verts[] =
 		{
@@ -140,16 +140,16 @@ private:
 			-0.5f, -0.5f
 		};
 
-		CreateGeometryBuffer(&verts[0], sizeof(verts));
+		CreateVertexBuffer(&verts[0], sizeof(verts));
 	}
 
-	void CreateGeometryBuffer(const void* data, unsigned int sizeInBytes)
+	void CreateVertexBuffer(const void* data, unsigned int sizeInBytes)
 	{
 		GvkHelper::create_buffer(physicalDevice, device, sizeInBytes,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &geometryHandle, &geometryData);
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexHandle, &vertexData);
 		// Transfer triangle data to the vertex buffer. (staging would be prefered here)
-		GvkHelper::write_to_buffer(device, geometryData, data, sizeInBytes);
+		GvkHelper::write_to_buffer(device, vertexData, data, sizeInBytes);
 	}
 
 	void CompileShaders()
@@ -240,13 +240,13 @@ private:
 		VkPipelineInputAssemblyStateCreateInfo assembly_create_info = CreateVkPipelineInputAssemblyStateCreateInfo();
 		VkVertexInputBindingDescription vertex_binding_description = CreateVkVertexInputBindingDescription();
 
-		std::array<VkVertexInputAttributeDescription, 1> vertex_attribute_description;
+		VkVertexInputAttributeDescription vertex_attribute_description[1];
 		vertex_attribute_description[0].binding = 0;
 		vertex_attribute_description[0].location = 0;
-		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		vertex_attribute_description[0].offset = model.accessors[1].bufferView;
+		vertex_attribute_description[0].format = VK_FORMAT_R32G32_SFLOAT;
+		vertex_attribute_description[0].offset = 0;
 
-		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description.data(), 1);
+		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description, 1);
 		VkViewport viewport = CreateViewportFromWindowDimensions();
 		VkRect2D scissor = CreateScissorFromWindowDimensions();
 		VkPipelineViewportStateCreateInfo viewport_create_info = CreateVkPipelineViewportStateCreateInfo(&viewport, 1, &scissor, 1);
@@ -301,7 +301,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(float) * 3;
+		retval.stride = sizeof(float) * 2;
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
@@ -463,7 +463,7 @@ public:
 	{
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
-		vkCmdDrawIndexed(commandBuffer, model.accessors[model.meshes[0].primitives[0].indices].count, 1, 0, 0, 0);
+		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 	}
 
 private:
@@ -484,40 +484,7 @@ private:
 		SetScissor(commandBuffer);
 
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-		bindingVertex(commandBuffer);
-		bindingIndex(commandBuffer);
-	}
-
-	void bindingVertex(VkCommandBuffer& commandBuffer)
-	{
-		for (const auto& attribute : model.meshes[0].primitives[0].attributes) {
-			const tinygltf::Accessor& accessor = model.accessors[attribute.second];
-			const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
-
-			// Bind the vertex buffer using the offset
-			VkDeviceSize offsets[] = { bufferView.byteOffset };
-			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
-		}
-	}
-
-	void bindingIndex(VkCommandBuffer& commandBuffer)
-	{
-		if (model.meshes[0].primitives[0].indices > -1) {
-			const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices];
-			const tinygltf::BufferView& indexBufferView = model.bufferViews[indexAccessor.bufferView];
-
-			// Determine the index format
-			VkIndexType indexType;
-			if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-				indexType = VK_INDEX_TYPE_UINT16;
-			}
-			else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
-				indexType = VK_INDEX_TYPE_UINT32;
-			}
-
-			// Bind the unified buffer (vertex + index) for index data
-			vkCmdBindIndexBuffer(commandBuffer, geometryHandle, indexBufferView.byteOffset, indexType);
-		}
+		BindVertexBuffers(commandBuffer);
 	}
 
 	void SetViewport(const VkCommandBuffer& commandBuffer)
@@ -532,13 +499,20 @@ private:
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
+	void BindVertexBuffers(VkCommandBuffer& commandBuffer)
+	{
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexHandle, offsets);
+	}
+
+
 	void CleanUp()
 	{
 		// wait till everything has completed
 		vkDeviceWaitIdle(device);
 		// Release allocated buffers, shaders & pipeline
-		vkDestroyBuffer(device, geometryHandle, nullptr);
-		vkFreeMemory(device, geometryData, nullptr);
+		vkDestroyBuffer(device, vertexHandle, nullptr);
+		vkFreeMemory(device, vertexData, nullptr);
 		vkDestroyShaderModule(device, vertexShader, nullptr);
 		vkDestroyShaderModule(device, fragmentShader, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
