@@ -1,4 +1,4 @@
-#define TINYGLTF_IMPLEMENTATION //needed for linking tinyGLTF
+#define TINYGLTF_IMPLEMENTATION //needed for linking tinygltf - a2
 #define	STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../TinyGLTF/tiny_gltf.h"
@@ -37,6 +37,12 @@ class Renderer
 	VkPipelineLayout pipelineLayout = nullptr;
 	unsigned int windowWidth, windowHeight;
 
+	tinygltf::Model model; //instance of model from tinygltf - part a2/a3
+	tinygltf::TinyGLTF loader; //instance of the tinygltf class - part a2
+	//strings github said to add for loading from gltf
+	std::string err;
+	std::string warn;
+
 public:
 
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
@@ -46,6 +52,26 @@ public:
 		UpdateWindowDimensions();
 		InitializeGraphics();
 		BindShutdownCallback();
+		loadingRudimentaryfromGltf("C:\full sail\3d content creation\3dcc-lab-5-xx0i\Models\triangle.gltf");
+			
+	}
+
+	void loadingRudimentaryfromGltf(std::string filepath)
+	{
+		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filepath);
+		//bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath); // for binary glTF(.glb)
+
+		if (!warn.empty()) {
+			printf("Warn: %s\n", warn.c_str());
+		}
+
+		if (!err.empty()) {
+			printf("Err: %s\n", err.c_str());
+		}
+
+		if (!ret) {
+			printf("Failed to parse glTF\n");
+		}
 	}
 
 private:

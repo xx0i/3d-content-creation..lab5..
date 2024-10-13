@@ -31,7 +31,7 @@ int main()
 			GW::SYSTEM::GWindow::Events q;
 			if (+e.Read(q) && q == GWindow::Events::RESIZE)
 				clrAndDepth[0].color.float32[2] += 0.01f; // disable
-			win.SetWindowName("Natalie Lubahn - Lab 5 - Vulkan"); //part 1a
+			win.SetWindowName("Natalie Lubahn - Lab 5 - Vulkan"); //part a1
 			});
 		win.Register(msgs);
 #ifndef NDEBUG
