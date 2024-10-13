@@ -93,6 +93,7 @@ public:
 			printf("\nNumber of buffers: %zu\n", model.buffers.size());
 			for (const auto& buffer : model.buffers) {
 				printf("Buffer URI: %s\n", buffer.uri.c_str());
+				printf("Buffer byteLength: %zu\n", buffer.data.size());
 			}
 
 			// Print buffer views
