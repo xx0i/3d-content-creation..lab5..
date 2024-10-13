@@ -28,8 +28,8 @@ class Renderer
 	VkDevice device = nullptr;
 	VkPhysicalDevice physicalDevice = nullptr;
 	VkRenderPass renderPass;
-	VkBuffer vertexHandle = nullptr;
-	VkDeviceMemory vertexData = nullptr;
+	VkBuffer geometryHandle = nullptr;
+	VkDeviceMemory geometryData = nullptr;
 	VkShaderModule vertexShader = nullptr;
 	VkShaderModule fragmentShader = nullptr;
 	// pipeline settings for drawing (also required)
@@ -119,7 +119,7 @@ private:
 	void InitializeGraphics()
 	{
 		GetHandlesFromSurface();
-		InitializeVertexBuffer();
+		InitializeGeometryBuffer();
 		CompileShaders();
 		InitializeGraphicsPipeline();
 	}
@@ -131,7 +131,7 @@ private:
 		vlk.GetRenderPass((void**)&renderPass);
 	}
 
-	void InitializeVertexBuffer()
+	void InitializeGeometryBuffer()
 	{
 		float verts[] =
 		{
@@ -140,16 +140,16 @@ private:
 			-0.5f, -0.5f
 		};
 
-		CreateVertexBuffer(&verts[0], sizeof(verts));
+		CreateGeometryBuffer(&verts[0], sizeof(verts));
 	}
 
-	void CreateVertexBuffer(const void* data, unsigned int sizeInBytes)
+	void CreateGeometryBuffer(const void* data, unsigned int sizeInBytes)
 	{
 		GvkHelper::create_buffer(physicalDevice, device, sizeInBytes,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexHandle, &vertexData);
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &geometryHandle, &geometryData);
 		// Transfer triangle data to the vertex buffer. (staging would be prefered here)
-		GvkHelper::write_to_buffer(device, vertexData, data, sizeInBytes);
+		GvkHelper::write_to_buffer(device, geometryData, data, sizeInBytes);
 	}
 
 	void CompileShaders()
@@ -502,7 +502,7 @@ private:
 	void BindVertexBuffers(VkCommandBuffer& commandBuffer)
 	{
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexHandle, offsets);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
 
@@ -511,8 +511,8 @@ private:
 		// wait till everything has completed
 		vkDeviceWaitIdle(device);
 		// Release allocated buffers, shaders & pipeline
-		vkDestroyBuffer(device, vertexHandle, nullptr);
-		vkFreeMemory(device, vertexData, nullptr);
+		vkDestroyBuffer(device, geometryHandle, nullptr);
+		vkFreeMemory(device, geometryData, nullptr);
 		vkDestroyShaderModule(device, vertexShader, nullptr);
 		vkDestroyShaderModule(device, fragmentShader, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
