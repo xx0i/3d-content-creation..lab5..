@@ -463,7 +463,7 @@ public:
 	{
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
-		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+		vkCmdDrawIndexed(commandBuffer, model.accessors[model.meshes[0].primitives[0].indices].count, 1, 0, 0, 0);
 	}
 
 private:
@@ -484,7 +484,40 @@ private:
 		SetScissor(commandBuffer);
 
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-		BindVertexBuffers(commandBuffer);
+		bindingVertex(commandBuffer);
+		bindingIndex(commandBuffer);
+	}
+
+	void bindingVertex(VkCommandBuffer& commandBuffer)
+	{
+		for (const auto& attribute : model.meshes[0].primitives[0].attributes) {
+			const tinygltf::Accessor& accessor = model.accessors[attribute.second];
+			const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+
+			// Bind the vertex buffer using the offset
+			VkDeviceSize offsets[1] = { bufferView.byteOffset };
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
+		}
+	}
+
+	void bindingIndex(VkCommandBuffer& commandBuffer)
+	{
+		if (model.meshes[0].primitives[0].indices > -1) {
+			const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices];
+			const tinygltf::BufferView& indexBufferView = model.bufferViews[indexAccessor.bufferView];
+
+			// Determine the index format
+			VkIndexType indexType;
+			if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+				indexType = VK_INDEX_TYPE_UINT16;
+			}
+			else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT) {
+				indexType = VK_INDEX_TYPE_UINT32;
+			}
+
+			// Bind the unified buffer (vertex + index) for index data
+			vkCmdBindIndexBuffer(commandBuffer, geometryHandle, indexBufferView.byteOffset, indexType);
+		}
 	}
 
 	void SetViewport(const VkCommandBuffer& commandBuffer)
