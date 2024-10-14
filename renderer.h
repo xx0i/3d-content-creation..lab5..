@@ -68,11 +68,10 @@ public:
 		UpdateWindowDimensions();
 		GetHandlesFromSurface();
 
+		loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle.gltf");
 		createDescriptorLayout();
 		InitializeGraphics();
 		BindShutdownCallback();
-		loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle.gltf");
-
 	}
 
 	void loadingRudimentaryfromGltf(std::string filepath)
