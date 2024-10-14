@@ -57,7 +57,7 @@ class Renderer
 	{
 		float posX, posY, posZ; //only dealing with position rn
 	};
-	std::vector<shaderVars> geometry{};
+	std::vector<uint8_t> geometry{};
 
 public:
 
@@ -191,16 +191,20 @@ private:
 		const float* posData = reinterpret_cast<const float*> 
 			(& model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
-		for (int i = 0; i < accessPos.count; i++)
-		{
-			shaderVars temp{};
-			temp.posX = posData[i * 3 + 0];
-			temp.posY = posData[i * 3 + 1];
-			temp.posZ = posData[i * 3 + 2];
-			geometry.push_back(temp);
-		}
+		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
+		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
+		const unsigned char* indexData = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
+			
+		unsigned int indexDataSize = bufferViewIndices.byteLength;
+		unsigned int posDataSize = bufferViewPos.byteLength;
 
-		unsigned int vertexDataSize = geometry.size() * sizeof(shaderVars);
+		unsigned int totalSize = posDataSize + indexDataSize;
+
+		geometry.resize(totalSize);
+
+		std::memcpy(geometry.data(), posData, posDataSize);
+		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
+
 
 		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
@@ -213,6 +217,40 @@ private:
 		// Transfer triangle data to the vertex buffer. (staging would be prefered here)
 		GvkHelper::write_to_buffer(device, geometryData, data, sizeInBytes);
 	}
+
+	//void InitializeGeometryBuffer()
+	//{
+	//	// Access the vertex position data
+	//	const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+
+	//	// Position data
+	//	const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
+	//	const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
+	//	const unsigned char* posDataStart = &model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset];
+	//	unsigned int posDataSize = bufferViewPos.byteLength;
+
+	//	// Index data
+	//	const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
+	//	const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
+	//	const unsigned char* indexDataStart = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
+	//	unsigned int indexDataSize = bufferViewIndices.byteLength;
+
+	//	// Calculate the total size required for the unified buffer (vertices + indices)
+	//	unsigned int totalSize = posDataSize + indexDataSize;
+
+	//	// Allocate a single array of bytes
+	//	std::vector<uint8_t> unifiedBuffer(totalSize);
+
+	//	// Copy vertex data
+	//	std::memcpy(unifiedBuffer.data(), posDataStart, posDataSize);
+
+	//	// Copy index data right after vertex data
+	//	std::memcpy(unifiedBuffer.data() + posDataSize, indexDataStart, indexDataSize);
+
+	//	// Create Vulkan buffer with unified data
+	//	CreateGeometryBuffer(unifiedBuffer.data(), totalSize);
+	//}
+
 
 	void initializeUniformBuffer()
 	{
@@ -699,7 +737,7 @@ private:
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 
 		VkDeviceSize vertexOffset = bufferViewPos.byteOffset;
-		VkDeviceSize offsets[] = { vertexOffset };
+		VkDeviceSize offsets[] = { /*vertexOffset*/0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
