@@ -647,6 +647,7 @@ public:
 	{
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
+
 		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 	}
 
@@ -686,7 +687,6 @@ private:
 	void BindVertexBuffers(VkCommandBuffer& commandBuffer)
 	{
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
-
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 
@@ -695,6 +695,31 @@ private:
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
+	void BindIndexBuffers(VkCommandBuffer& commandBuffer)
+	{
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Accessor& accessIndicies = model.accessors[primitive.indices];
+		const tinygltf::BufferView& bufferViewIndicies = model.bufferViews[accessIndicies.bufferView];
+
+		VkDeviceSize indexOffset = bufferViewIndicies.byteOffset;
+
+		VkIndexType indexType;
+		switch (accessIndicies.componentType)
+		{
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: // 5123
+			indexType = VK_INDEX_TYPE_UINT16;
+			break;
+
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: // 5125
+			indexType = VK_INDEX_TYPE_UINT32;
+			break;
+
+		default:
+			throw std::runtime_error("Unsupported index component type!");
+		}
+
+		vkCmdBindIndexBuffer(commandBuffer, geometryHandle, indexOffset, indexType);
+	}
 
 	void CleanUp()
 	{
