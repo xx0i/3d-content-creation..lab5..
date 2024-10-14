@@ -164,7 +164,7 @@ private:
 
 	void InitializeGraphics()
 	{
-		InitializeVertexBuffer();
+		InitializeGeometryBuffer();
 		//buffers + descriptors
 		initializeUniformBuffer();
 		initializeStorageBuffer();
@@ -182,7 +182,7 @@ private:
 		vlk.GetRenderPass((void**)&renderPass);
 	}
 
-	void InitializeVertexBuffer()
+	void InitializeGeometryBuffer()
 	{
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
@@ -706,5 +706,25 @@ private:
 		vkDestroyShaderModule(device, fragmentShader, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyPipeline(device, pipeline, nullptr);
+		//releasing vectors and descriptors
+		for (int i = 0; i < uniformBufferHandle.size(); i++)
+		{
+			vkDestroyBuffer(device, uniformBufferHandle[i], nullptr);
+
+			vkFreeMemory(device, uniformBufferData[i], nullptr);
+		}
+		uniformBufferHandle.clear();
+		uniformBufferData.clear();
+
+		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+
+		for (int i = 0; i < storageBufferHandle.size(); i++)
+		{
+			vkDestroyBuffer(device, storageBufferHandle[i], nullptr);
+			vkFreeMemory(device, storageBufferData[i], nullptr);
+		}
+		storageBufferHandle.clear();
+		storageBufferData.clear();
 	}
 };
