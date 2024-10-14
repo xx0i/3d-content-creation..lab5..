@@ -184,44 +184,28 @@ private:
 
 	void InitializeGeometryBuffer()
 	{
-		// Get vertex data
+		//vertex data
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
-		const float* posData = reinterpret_cast<const float*>(
-			&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
+		const float* posData = reinterpret_cast<const float*> 
+			(& model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
-		// Get index data
 		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
 		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
 		const unsigned char* indexData = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
-
+			
 		unsigned int indexDataSize = bufferViewIndices.byteLength;
 		unsigned int posDataSize = bufferViewPos.byteLength;
 
 		unsigned int totalSize = posDataSize + indexDataSize;
 
-		// Resize the geometry buffer to hold both vertex and index data
 		geometry.resize(totalSize);
 
-		// Copy vertex data to the geometry buffer
 		std::memcpy(geometry.data(), posData, posDataSize);
-		// Copy index data to the geometry buffer
 		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
 
-		// Calculate the number of vertices
-		unsigned int vertexCount = posDataSize / sizeof(float) / 3; // Assuming each vertex has 3 floats (x, y, z)
-
-		// Print vertex data
-		for (size_t i = 0; i < vertexCount; i++) {
-			std::cout << "Geometry Vertex " << i << ": ("
-				<< geometry[i * 3] << ", "
-				<< geometry[i * 3 + 1] << ", "
-				<< geometry[i * 3 + 2] << ")\n";
-		}
-
-		// Create the geometry buffer for Vulkan
-		CreateGeometryBuffer(geometry.data(), geometry.size());
+		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
 
 	void CreateGeometryBuffer(const void* data, unsigned int sizeInBytes)
