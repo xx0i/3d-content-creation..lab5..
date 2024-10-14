@@ -197,9 +197,9 @@ private:
 		for (int i = 0; i < accessPos.count; i++)
 		{
 			shaderVars temp{};
-			temp.posX = posData[i + 3 + 0];
-			temp.posY = posData[i + 3 + 1];
-			temp.posZ = posData[i + 3 + 2];
+			temp.posX = posData[i * 3 + 0];
+			temp.posY = posData[i * 3 + 1];
+			temp.posZ = posData[i * 3 + 2];
 			geometry.push_back(temp);
 		}
 
