@@ -190,6 +190,10 @@ private:
 		const float* posData = reinterpret_cast<const float*> 
 			(& model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
+		for (int i = 0; i < accessPos.count * 3; i++) {
+			std::cout << "Position Data " << i << ": " << posData[i] << std::endl;
+		}
+
 		for (int i = 0; i < accessPos.count; i++)
 		{
 			shaderVars temp{};
