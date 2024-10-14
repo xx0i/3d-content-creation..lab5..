@@ -685,7 +685,13 @@ private:
 
 	void BindVertexBuffers(VkCommandBuffer& commandBuffer)
 	{
-		VkDeviceSize offsets[] = { 0 };
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+
+		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
+		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
+
+		VkDeviceSize vertexOffset = bufferViewPos.byteOffset;
+		VkDeviceSize offsets[] = { vertexOffset };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
