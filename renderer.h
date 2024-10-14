@@ -202,29 +202,7 @@ private:
 
 		unsigned int vertexDataSize = geometry.size() * sizeof(shaderVars);
 
-		//index data
-		const tinygltf::Accessor& accessIndicies = model.accessors[primitive.indices];
-		const tinygltf::BufferView& bufferViewIndicies = model.bufferViews[accessIndicies.bufferView];
-
-		unsigned int indexDataSize = accessIndicies.count * 
-			(accessIndicies.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? sizeof(uint16_t) : sizeof(uint32_t));
-		unsigned int totalsize = indexDataSize + vertexDataSize;
-
-		std::vector<char> tempBuffer(vertexDataSize + indexDataSize);
-
-		// Copy vertex data to temporary buffer
-		memcpy(tempBuffer.data(), geometry.data(), vertexDataSize);
-
-		// Copy index data to temporary buffer
-		const void* indexData = reinterpret_cast<const void*>(
-			&model.buffers[bufferViewIndicies.buffer].data[bufferViewIndicies.byteOffset + accessIndicies.byteOffset]);
-		memcpy(tempBuffer.data() + vertexDataSize, indexData, indexDataSize);
-
-		// Write the entire temporary buffer to the unified geometry buffer
-		CreateGeometryBuffer(tempBuffer.data(), tempBuffer.size());
-
-
-		//CreateGeometryBuffer(&geometry[0], geometry.size());
+		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
 
 	void CreateGeometryBuffer(const void* data, unsigned int sizeInBytes)
