@@ -510,7 +510,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(TINYGLTF_TYPE_SCALAR) + sizeof(shaderVars);
+		retval.stride = sizeof(shaderVars);
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
@@ -745,7 +745,7 @@ private:
 			break;
 
 		default:
-			throw std::runtime_error("Unsupported index component type!");
+			throw std::runtime_error("Unsupported index component type");
 		}
 
 		vkCmdBindIndexBuffer(commandBuffer, geometryHandle, indexOffset, indexType);
