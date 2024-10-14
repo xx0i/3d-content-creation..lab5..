@@ -510,7 +510,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(float) * 3;
+		retval.stride = sizeof(TINYGLTF_TYPE_SCALAR) + sizeof(shaderVars);
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
