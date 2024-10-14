@@ -449,13 +449,13 @@ private:
 		VkPipelineInputAssemblyStateCreateInfo assembly_create_info = CreateVkPipelineInputAssemblyStateCreateInfo();
 		VkVertexInputBindingDescription vertex_binding_description = CreateVkVertexInputBindingDescription();
 
-		VkVertexInputAttributeDescription vertex_attribute_description[1];
+		std::array<VkVertexInputAttributeDescription,1> vertex_attribute_description;
 		vertex_attribute_description[0].binding = 0;
 		vertex_attribute_description[0].location = 0;
-		vertex_attribute_description[0].format = VK_FORMAT_R32G32_SFLOAT;
+		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		vertex_attribute_description[0].offset = 0;
 
-		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description, 1);
+		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description.data(), 1);
 		VkViewport viewport = CreateViewportFromWindowDimensions();
 		VkRect2D scissor = CreateScissorFromWindowDimensions();
 		VkPipelineViewportStateCreateInfo viewport_create_info = CreateVkPipelineViewportStateCreateInfo(&viewport, 1, &scissor, 1);
@@ -510,7 +510,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(float) * 2;
+		retval.stride = sizeof(shaderVars);
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
