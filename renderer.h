@@ -205,6 +205,13 @@ private:
 		std::memcpy(geometry.data(), posData, posDataSize);
 		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
 
+		for (size_t i = 0; i < geometry.size() / sizeof(float) / 3; i++) {
+			std::cout << "Geometry Vertex " << i << ": ("
+				<< geometry[i * 3] << ", "
+				<< geometry[i * 3 + 1] << ", "
+				<< geometry[i * 3 + 2] << ")\n";
+		}
+
 		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
 
