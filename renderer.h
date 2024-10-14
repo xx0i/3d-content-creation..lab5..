@@ -677,7 +677,7 @@ public:
 		
 		const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices];
 		uint32_t indexCount = indexAccessor.count;
-		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 8, 0);
 	}
 
 private:
