@@ -195,9 +195,8 @@ private:
 		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
 		const unsigned char* indexData = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
 			
-		unsigned int indexDataSize = accessIndices.count * sizeof(uint16_t);  // For unsigned short indices
-		unsigned int posDataSize = accessPos.count * 3 * sizeof(float);  // 3 floats per vertex position
-
+		unsigned int indexDataSize = bufferViewIndices.byteLength;
+		unsigned int posDataSize = bufferViewPos.byteLength;
 
 		unsigned int totalSize = posDataSize + indexDataSize;
 
