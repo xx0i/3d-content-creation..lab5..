@@ -695,6 +695,7 @@ private:
 
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 		BindVertexBuffers(commandBuffer);
+		BindIndexBuffers(commandBuffer);
 	}
 
 	void SetViewport(const VkCommandBuffer& commandBuffer)
