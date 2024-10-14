@@ -217,43 +217,9 @@ private:
 		GvkHelper::write_to_buffer(device, geometryData, data, sizeInBytes);
 	}
 
-	//void InitializeGeometryBuffer()
-	//{
-	//	// Access the vertex position data
-	//	const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
-
-	//	// Position data
-	//	const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
-	//	const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
-	//	const unsigned char* posDataStart = &model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset];
-	//	unsigned int posDataSize = bufferViewPos.byteLength;
-
-	//	// Index data
-	//	const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
-	//	const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
-	//	const unsigned char* indexDataStart = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
-	//	unsigned int indexDataSize = bufferViewIndices.byteLength;
-
-	//	// Calculate the total size required for the unified buffer (vertices + indices)
-	//	unsigned int totalSize = posDataSize + indexDataSize;
-
-	//	// Allocate a single array of bytes
-	//	std::vector<uint8_t> unifiedBuffer(totalSize);
-
-	//	// Copy vertex data
-	//	std::memcpy(unifiedBuffer.data(), posDataStart, posDataSize);
-
-	//	// Copy index data right after vertex data
-	//	std::memcpy(unifiedBuffer.data() + posDataSize, indexDataStart, indexDataSize);
-
-	//	// Create Vulkan buffer with unified data
-	//	CreateGeometryBuffer(unifiedBuffer.data(), totalSize);
-	//}
-
-
 	void initializeUniformBuffer()
 	{
-		unsigned int bufferSize = sizeof(shaderVars);  //size of the uniform data
+		unsigned int bufferSize = sizeof(float) * 3;  //size of the uniform data
 
 		//gets the number of active frames
 		uint32_t imageCount;
@@ -273,7 +239,7 @@ private:
 
 	void initializeStorageBuffer()
 	{
-		unsigned int bufferSize = sizeof(geometryData) * geometry.size();  //size of the storage data
+		unsigned int bufferSize = geometry.size();  //size of the storage data
 
 		//gets the number of active frames
 		uint32_t imageCount;
@@ -338,12 +304,12 @@ private:
 			VkDescriptorBufferInfo uniformDescriptorBuffer = {};
 			uniformDescriptorBuffer.buffer = uniformBufferHandle[i];
 			uniformDescriptorBuffer.offset = 0;
-			uniformDescriptorBuffer.range = sizeof(shaderVars);
+			uniformDescriptorBuffer.range = sizeof(float) * 3;
 
 			VkDescriptorBufferInfo storageDescriptorBuffer = {};
 			storageDescriptorBuffer.buffer = storageBufferHandle[i];
 			storageDescriptorBuffer.offset = 0;
-			storageDescriptorBuffer.range = sizeof(geometryData) * geometry.size();
+			storageDescriptorBuffer.range = geometry.size();
 
 			VkWriteDescriptorSet writeUniformDescriptor = {};
 			writeUniformDescriptor.descriptorCount = 1;
@@ -525,7 +491,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(shaderVars);
+		retval.stride = sizeof(float) * 3;
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
@@ -736,7 +702,7 @@ private:
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 
 		VkDeviceSize vertexOffset = bufferViewPos.byteOffset;
-		VkDeviceSize offsets[] = { /*vertexOffset*/0 };
+		VkDeviceSize offsets[] = { vertexOffset };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
