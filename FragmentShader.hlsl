@@ -21,7 +21,7 @@ float4 main(OUTPUT2 input) : SV_TARGET
     static float4 diffuse = { 0.75f, 0.75f, 0.25f, 0.0f };
     static float4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
     static float4 emissive = { 0.0f, 0.0f, 0.0f, 1.0f };
-    static float4 ambient = { 0.62f, 0.50f, 0.50f, 0 };
+    static float4 ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
     static float ns = 100.0f;
     
     
