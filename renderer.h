@@ -275,11 +275,6 @@ private:
 
 	void initializeStorageBuffer()
 	{
-		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
-		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
-		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
-		const unsigned short* indexData = reinterpret_cast<const unsigned short*>
-			(&model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset]);
 		unsigned int bufferSize = geometry.size();  //size of the storage data
 
 		//gets the number of active frames
