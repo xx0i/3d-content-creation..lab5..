@@ -878,7 +878,7 @@ private:
 		vkCmdBindVertexBuffers(commandBuffer, 2, 1, &geometryHandle, offsets2);
 
 		//tangent
-		VkDeviceSize offsets3[] = { posDataSize + normDataSize + tanDataSize };
+		VkDeviceSize offsets3[] = { posDataSize + normDataSize + texDataSize };
 		vkCmdBindVertexBuffers(commandBuffer, 3, 1, &geometryHandle, offsets3);
 	}
 
