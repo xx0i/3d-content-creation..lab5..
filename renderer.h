@@ -65,8 +65,8 @@ public:
 		GetHandlesFromSurface();
 
 		//loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle.gltf");
-		loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle_blender.gltf");
-		//loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/cat_blender.gltf");
+		//loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle_blender.gltf");
+		loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/cat_blender.gltf");
 		createDescriptorLayout();
 		InitializeGraphics();
 		BindShutdownCallback();
