@@ -301,12 +301,6 @@ private:
 
 	void initializeUniformBuffer()
 	{
-		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
-		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
-		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
-		const float* posData = reinterpret_cast<const float*>
-			(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
-
 		unsigned int bufferSize = sizeof(shaderVars);  //size of the uniform data
 
 		//gets the number of active frames

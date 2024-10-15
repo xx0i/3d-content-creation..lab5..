@@ -31,7 +31,7 @@ OUTPUT main(shaderVars input : POSITION) : SV_POSITION
     float4 pos = mul(float4(input.pos, 1), result);
     
     OUTPUT output;
-    output.pos = pos;
+    output.pos = float4(input.pos, 1);
     output.norm = input.norm;
     output.texCoord = input.texCoords;
     output.tangents = input.tangents;
