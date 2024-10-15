@@ -16,12 +16,13 @@ struct OUTPUT
     float4 tangents : TANGENT;
 };
 
-cbuffer shaderVars
+cbuffer matrix_data
 {
     matrix worldMatrix;
     matrix viewMatrix;
     matrix perspectiveMatrix;
 };
+
 
 OUTPUT main(shaderVars input : POSITION) : SV_POSITION 
 {
@@ -31,7 +32,7 @@ OUTPUT main(shaderVars input : POSITION) : SV_POSITION
     float4 pos = mul(float4(input.pos, 1), result);
     
     OUTPUT output;
-    output.pos = float4(input.pos, 1);
+    output.pos = pos;
     output.norm = input.norm;
     output.texCoord = input.texCoords;
     output.tangents = input.tangents;
