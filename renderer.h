@@ -844,11 +844,16 @@ private:
 public:
 	void Render()
 	{
+		uint32_t activeImage;
+		vlk.GetSwapchainCurrentImage(activeImage);
+
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 
 		//vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-		
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[activeImage], 0, 0);
+
+
 		const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices]; //part b2
 		uint32_t indexCount = indexAccessor.count;
 		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
