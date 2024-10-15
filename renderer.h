@@ -221,6 +221,12 @@ private:
 
 	void initializeUniformBuffer()
 	{
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
+		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
+		const float* posData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
+
 		unsigned int bufferSize = sizeof(float) * 3;  //size of the uniform data
 
 		//gets the number of active frames
@@ -235,12 +241,17 @@ private:
 		{
 			GvkHelper::create_buffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBufferHandle[i], &uniformBufferData[i]);
-			GvkHelper::write_to_buffer(device, uniformBufferData[i], geometry.data(), bufferSize);
+			GvkHelper::write_to_buffer(device, uniformBufferData[i], posData, bufferSize);
 		}
 	}
 
 	void initializeStorageBuffer()
 	{
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
+		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
+		const unsigned short* indexData = reinterpret_cast<const unsigned short*>
+			(&model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset]);
 		unsigned int bufferSize = geometry.size();  //size of the storage data
 
 		//gets the number of active frames
@@ -255,7 +266,12 @@ private:
 		{
 			GvkHelper::create_buffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &storageBufferHandle[i], &storageBufferData[i]);
-			GvkHelper::write_to_buffer(device, storageBufferData[i], geometry.data(), bufferSize);
+			GvkHelper::write_to_buffer(device, storageBufferData[i], indexData, bufferSize);
+			const float* uniformData = reinterpret_cast<const float*>(uniformBufferData[i]);
+			std::cout << "Uniform Buffer " << i << ": ("
+				<< uniformData[0] << ", "
+				<< uniformData[1] << ", "
+				<< uniformData[2] << ")\n";
 		}
 	}
 
