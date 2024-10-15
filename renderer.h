@@ -221,7 +221,8 @@ private:
 		// Index data
 		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
 		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
-		const unsigned char* indexData = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
+		const unsigned short* indexData = reinterpret_cast<const unsigned short*>(
+			&model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset]);
 
 		unsigned int indexDataSize = bufferViewIndices.byteLength;
 		unsigned int posDataSize = bufferViewPos.byteLength;
@@ -250,14 +251,13 @@ private:
 				<< geometry[i * 3 + 2] << ")\n";
 		}
 
-		// Print index data (assuming unsigned int indices)
-		unsigned int indexCount = indexDataSize / sizeof(unsigned int);
+		// Print index data
+		unsigned int indexCount = indexDataSize / sizeof(unsigned short);
 		std::cout << "Index Data:\n";
 		for (size_t i = 0; i < indexCount; i++) {
-			unsigned int index = *reinterpret_cast<const unsigned int*>(geometry.data() + posDataSize + i * sizeof(unsigned int));
+			unsigned short index = *reinterpret_cast<const unsigned short*>(geometry.data() + posDataSize + i * sizeof(unsigned short));
 			std::cout << "Index " << i << ": " << index << "\n";
 		}
-
 		// Create the geometry buffer for Vulkan
 		CreateGeometryBuffer(geometry.data(), geometry.size());
 	}
