@@ -267,7 +267,7 @@ private:
 			GvkHelper::create_buffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &storageBufferHandle[i], &storageBufferData[i]);
 			GvkHelper::write_to_buffer(device, storageBufferData[i], indexData, bufferSize);
-			const float* uniformData = reinterpret_cast<const float*>(&storageBufferData[i]);
+			const float* uniformData = reinterpret_cast<const float*>(&uniformBufferData[i]);
 			std::cout << "Uniform Buffer " << i << ": ("
 				<< uniformData[0] << ", "
 				<< uniformData[1] << ", "
