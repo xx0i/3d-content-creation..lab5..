@@ -221,7 +221,7 @@ private:
 
 		unsigned int totalSize = posDataSize + normDataSize + texDataSize + tanDataSize + indexDataSize;
 	
-		if (!totalSize % 4 == 0)
+		if (!totalSize % 4 == 0) //adds the padding if needed
 		{
 			totalSize += totalSize % 4;
 		}
