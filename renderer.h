@@ -64,8 +64,8 @@ class Renderer
 	struct shaderVars
 	{
 		GW::MATH::GMATRIXF worldMatrix, viewMatrix, perspectiveMatrix;
-		GW::MATH::GVECTORF lightColour, lightDir;
-		GW::MATH::GVECTORF ambientLight, camPos;
+		GW::MATH::GVECTORF lightColour, ambientLight;
+		GW::MATH::GVECTORF lightDir, camPos;
 	};
 	shaderVars shaderVarsUniformBuffer{};
 

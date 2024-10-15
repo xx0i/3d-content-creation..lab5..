@@ -8,7 +8,7 @@ struct shaderVars //part b4
     float4 tangents : TANGENT;
 };
 
-struct OUTPUT
+struct OUTPUT1
 {
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
@@ -16,24 +16,45 @@ struct OUTPUT
     float4 tangents : TANGENT;
 };
 
-cbuffer matrix_data
+struct OUTPUT2
 {
-    matrix worldMatrix;
-    matrix viewMatrix;
-    matrix perspectiveMatrix;
+    float4 posH : SV_POSITION;
+    float3 posW : WORLD;
+    float3 normW : NORMAL;
+    float2 texCoord : TEXCOORD;
+    float4 tangents : TANGENT;
+};
+
+cbuffer other_data
+{
+    matrix worldMatrix, viewMatrix, perspectiveMatrix;
+    vector lightColour, ambientLight;
+    vector lightDir, camPos;
 };
 
 
-OUTPUT main(shaderVars input : POSITION) : SV_POSITION 
+OUTPUT2 main(shaderVars input : POSITION) : SV_POSITION 
 {
+    //temp hard coded data - till the texture data is used in lab 6
+    static float4 diffuse = { 0.75f, 0.75f, 0.25f, 0.0f };
+    static float4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+    static float4 emissive = { 0.0f, 0.0f, 0.0f, 1.0f };
+    static float ns = 100.0f;
     
-    matrix result = mul(worldMatrix, viewMatrix);
-    result = mul(result, perspectiveMatrix);
-    float4 pos = mul(float4(input.pos, 1), result);
+    //matrix result = mul(worldMatrix, viewMatrix);
+    //result = mul(result, perspectiveMatrix);
+    //float4 pos = mul(float4(input.pos, 1), result);
     
-    OUTPUT output;
-    output.pos = pos;
-    output.norm = input.norm;
+    float4 worldPos = mul(float4(input.pos, 1), worldMatrix);
+    float4 viewPos = mul(worldPos, viewMatrix);
+    float4 perspectivePos = mul(viewPos, perspectiveMatrix);
+    
+    float3 worldNorm = normalize(mul(input.norm, (float3x3) worldMatrix));
+    
+    OUTPUT2 output;
+    output.posH = perspectivePos;
+    output.posW = worldPos;
+    output.normW = worldNorm;
     output.texCoord = input.texCoords;
     output.tangents = input.tangents;
 	return output;
