@@ -1,3 +1,4 @@
+#pragma pack_matrix( row_major )  
 // an ultra simple hlsl vertex shader
 struct shaderVars //part b4
 {
@@ -15,10 +16,22 @@ struct OUTPUT
     float4 tangents : TANGENT;
 };
 
+cbuffer shaderVars
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix perspectiveMatrix;
+};
+
 OUTPUT main(shaderVars input : POSITION) : SV_POSITION 
 {
+    
+    matrix result = mul(worldMatrix, viewMatrix);
+    result = mul(result, perspectiveMatrix);
+    float4 pos = mul(float4(input.pos, 1), result);
+    
     OUTPUT output;
-    output.pos = float4(input.pos, 1);
+    output.pos = pos;
     output.norm = input.norm;
     output.texCoord = input.texCoords;
     output.tangents = input.tangents;

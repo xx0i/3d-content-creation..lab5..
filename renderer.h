@@ -55,6 +55,25 @@ class Renderer
 
 	std::vector<uint8_t> geometry{};
 
+	//3d matrices
+	GW::MATH::GMatrix interfaceProxy;
+	GW::MATH::GMATRIXF worldMatrix = GW::MATH::GIdentityMatrixF;
+	GW::MATH::GMATRIXF viewMatrix = GW::MATH::GIdentityMatrixF;
+	GW::MATH::GMATRIXF perspectiveMatrix = GW::MATH::GIdentityMatrixF;
+
+	struct shaderVars
+	{
+		GW::MATH::GMATRIXF worldMatrix;
+		GW::MATH::GMATRIXF viewMatrix;
+		GW::MATH::GMATRIXF perspectiveMatrix;
+	};
+	shaderVars shaderVarsUniformBuffer{};
+
+	//camera controls
+	GW::INPUT::GInput input;
+	GW::INPUT::GController controller;
+	std::chrono::high_resolution_clock::time_point startTime;
+
 public:
 
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
@@ -64,12 +83,45 @@ public:
 		UpdateWindowDimensions();
 		GetHandlesFromSurface();
 
+		startTime = std::chrono::high_resolution_clock::now();
+		interfaceProxy.Create();
+
+		shaderVarsUniformBuffer.worldMatrix = worldMatrix;
+		initializeViewMatrix();
+		shaderVarsUniformBuffer.viewMatrix = viewMatrix;
+		initializePerspectiveMatrix();
+		shaderVarsUniformBuffer.perspectiveMatrix = perspectiveMatrix;
+		
+		//controllers for camera
+		input.Create(win);
+		controller.Create();
+
 		//loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle.gltf");
 		//loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/triangle_blender.gltf");
 		loadingRudimentaryfromGltf("C:/full sail/3d content creation/3dcc-lab-5-xx0i/Models/cat_blender.gltf");
 		createDescriptorLayout();
 		InitializeGraphics();
 		BindShutdownCallback();
+	}
+
+	void initializeViewMatrix()
+	{
+		uint32_t currentImage;
+		vlk.GetSwapchainCurrentImage(currentImage);
+
+		GW::MATH::GVECTORF cameraPosition = { 0.25f, -0.125f, -0.25f };
+		GW::MATH::GVECTORF targetPosition = { 0.0f, -0.5f, 0.0f };
+		GW::MATH::GVECTORF upVector = { 0.0f, 1.0f, 0.0f };
+		interfaceProxy.LookAtLHF(cameraPosition, targetPosition, upVector, viewMatrix);
+		//shaderVarsUniformBuffer.viewMatrix = viewMatrix;
+		//GvkHelper::write_to_buffer(device, uniformBufferData[currentImage], &shaderVarsUniformBuffer, sizeof(shaderVars));
+	}
+
+	void initializePerspectiveMatrix()
+	{
+		float aspectRatio = 0.0f;
+		vlk.GetAspectRatio(aspectRatio);
+		interfaceProxy.ProjectionDirectXLHF(G_DEGREE_TO_RADIAN_F(65.0f), aspectRatio, 0.1, 100, perspectiveMatrix);
 	}
 
 	void loadingRudimentaryfromGltf(std::string filepath)
@@ -255,7 +307,7 @@ private:
 		const float* posData = reinterpret_cast<const float*>
 			(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
-		unsigned int bufferSize = sizeof(float) * 3;  //size of the uniform data
+		unsigned int bufferSize = sizeof(shaderVars);  //size of the uniform data
 
 		//gets the number of active frames
 		uint32_t imageCount;
@@ -269,7 +321,7 @@ private:
 		{
 			GvkHelper::create_buffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &uniformBufferHandle[i], &uniformBufferData[i]);
-			GvkHelper::write_to_buffer(device, uniformBufferData[i], posData, bufferSize);
+			GvkHelper::write_to_buffer(device, uniformBufferData[i], &shaderVarsUniformBuffer, bufferSize);
 		}
 	}
 
@@ -340,7 +392,7 @@ private:
 			VkDescriptorBufferInfo uniformDescriptorBuffer = {};
 			uniformDescriptorBuffer.buffer = uniformBufferHandle[i];
 			uniformDescriptorBuffer.offset = 0;
-			uniformDescriptorBuffer.range = sizeof(float) * 3;
+			uniformDescriptorBuffer.range = sizeof(shaderVars);
 
 			VkDescriptorBufferInfo storageDescriptorBuffer = {};
 			storageDescriptorBuffer.buffer = storageBufferHandle[i];
@@ -770,8 +822,8 @@ private:
 		// Descriptor pipeline layout
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipeline_layout_create_info.setLayoutCount = 0;
-		pipeline_layout_create_info.pSetLayouts = VK_NULL_HANDLE;
+		pipeline_layout_create_info.setLayoutCount = 1;
+		pipeline_layout_create_info.pSetLayouts = &descriptorSetLayout;
 		pipeline_layout_create_info.pushConstantRangeCount = 0;
 		pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
@@ -802,6 +854,73 @@ public:
 		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
 	}
 	
+	void updateCamera()
+	{
+		float elapsedTime = std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - startTime).count();
+
+		GW::MATH::GMATRIXF viewCopy{};
+		interfaceProxy.InverseF(viewMatrix, viewCopy);
+
+		uint32_t currentImage;
+		vlk.GetSwapchainCurrentImage(currentImage);
+
+		float yChange = 0.0f;
+		float states[6] = { 0, 0, 0, 0, 0, 0 };
+		static float cameraSpeed = 0.0003f;
+
+		input.GetState(G_KEY_SPACE, states[0]);
+		input.GetState(G_KEY_LEFTSHIFT, states[1]);
+		controller.GetState(0, G_RIGHT_TRIGGER_AXIS, states[2]);
+		controller.GetState(0, G_LEFT_TRIGGER_AXIS, states[3]);
+
+		yChange = states[0] - states[1] + states[2] - states[3];
+		viewCopy.row4.y += static_cast<float>(yChange * cameraSpeed * elapsedTime);
+
+		const float perFrameSpeed = cameraSpeed * elapsedTime;
+		input.GetState(G_KEY_W, states[0]);
+		input.GetState(G_KEY_S, states[1]);
+		input.GetState(G_KEY_A, states[2]);
+		input.GetState(G_KEY_D, states[3]);
+		controller.GetState(0, G_LY_AXIS, states[4]);
+		controller.GetState(0, G_LX_AXIS, states[5]);
+		float zChange = states[0] - states[1] + states[4];
+		float xChange = states[3] - states[2] + states[5];
+		GW::MATH::GVECTORF translate{ xChange * perFrameSpeed, 0, zChange * perFrameSpeed };
+		interfaceProxy.TranslateLocalF(viewCopy, translate, viewCopy);
+
+		unsigned int height;
+		win.GetClientHeight(height);
+
+		if (input.GetMouseDelta(states[0], states[1]) != GW::GReturn::SUCCESS)
+		{
+			states[0] = states[1] = 0;
+			states[2] = states[3] = 0;
+		}
+		controller.GetState(0, G_RY_AXIS, states[2]);
+		controller.GetState(0, G_RX_AXIS, states[3]);
+
+		float thumbSpeed = G_PI * elapsedTime;
+		float totalPitch = G_PI / 2 * states[1] / height + states[2] * -thumbSpeed;
+		GW::MATH::GMATRIXF pitchMatrix{};
+		GW::MATH::GMATRIXF identity = GW::MATH::GIdentityMatrixF;
+		interfaceProxy.RotateXLocalF(identity, totalPitch, pitchMatrix);
+		interfaceProxy.MultiplyMatrixF(pitchMatrix, viewCopy, viewCopy);
+
+		unsigned int width;
+		win.GetClientWidth(width);
+		float ar = width / static_cast<float>(height);
+		float yaw = G_PI / 2 * ar * states[0] / width + states[3] * thumbSpeed;
+		GW::MATH::GMATRIXF yawMatrix;
+		interfaceProxy.RotateYLocalF(identity, yaw, yawMatrix);
+		GW::MATH::GVECTORF pos = viewCopy.row4;
+		interfaceProxy.MultiplyMatrixF(viewCopy, yawMatrix, viewCopy);
+		viewCopy.row4 = pos;
+
+		interfaceProxy.InverseF(viewCopy, viewMatrix);
+		shaderVarsUniformBuffer.viewMatrix = viewMatrix;
+		GvkHelper::write_to_buffer(device, uniformBufferData[currentImage], &shaderVarsUniformBuffer, sizeof(shaderVars));
+	}
+
 private:
 
 	VkCommandBuffer GetCurrentCommandBuffer()
