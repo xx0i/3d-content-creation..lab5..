@@ -182,30 +182,84 @@ private:
 		vlk.GetRenderPass((void**)&renderPass);
 	}
 
+	//void InitializeGeometryBuffer()
+	//{
+	//	//vertex data
+	//	const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+	//	const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
+	//	const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
+	//	const float* posData = reinterpret_cast<const float*> 
+	//		(& model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
+
+	//	const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
+	//	const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
+	//	const unsigned char* indexData = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
+	//		
+	//	unsigned int indexDataSize = bufferViewIndices.byteLength;
+	//	unsigned int posDataSize = bufferViewPos.byteLength;
+
+	//	unsigned int totalSize = posDataSize + indexDataSize;
+
+	//	geometry.resize(totalSize);
+
+	//	std::memcpy(geometry.data(), posData, posDataSize);
+	//	std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
+
+	//	CreateGeometryBuffer(&geometry[0], geometry.size());
+	//}
+
+
 	void InitializeGeometryBuffer()
 	{
-		//vertex data
+		// Vertex data
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
-		const float* posData = reinterpret_cast<const float*> 
-			(& model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
+		const float* posData = reinterpret_cast<const float*>(
+			&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
+		// Index data
 		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
 		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
 		const unsigned char* indexData = &model.buffers[bufferViewIndices.buffer].data[bufferViewIndices.byteOffset];
-			
+
 		unsigned int indexDataSize = bufferViewIndices.byteLength;
 		unsigned int posDataSize = bufferViewPos.byteLength;
 
 		unsigned int totalSize = posDataSize + indexDataSize;
 
+		// Resize the geometry buffer to hold both vertex and index data
 		geometry.resize(totalSize);
 
+		// Copy vertex data to the geometry buffer
 		std::memcpy(geometry.data(), posData, posDataSize);
+		// Copy index data to the geometry buffer
 		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
 
-		CreateGeometryBuffer(&geometry[0], geometry.size());
+		// Print sizes for debugging
+		std::cout << "Position Data Size: " << posDataSize << " bytes\n";
+		std::cout << "Index Data Size: " << indexDataSize << " bytes\n";
+		std::cout << "Total Geometry Size: " << totalSize << " bytes\n";
+
+		// Print vertex data (assuming 3 floats per vertex)
+		unsigned int vertexCount = posDataSize / sizeof(float) / 3;
+		for (size_t i = 0; i < vertexCount; i++) {
+			std::cout << "Vertex " << i << ": ("
+				<< geometry[i * 3] << ", "
+				<< geometry[i * 3 + 1] << ", "
+				<< geometry[i * 3 + 2] << ")\n";
+		}
+
+		// Print index data (assuming unsigned int indices)
+		unsigned int indexCount = indexDataSize / sizeof(unsigned int);
+		std::cout << "Index Data:\n";
+		for (size_t i = 0; i < indexCount; i++) {
+			unsigned int index = *reinterpret_cast<const unsigned int*>(geometry.data() + posDataSize + i * sizeof(unsigned int));
+			std::cout << "Index " << i << ": " << index << "\n";
+		}
+
+		// Create the geometry buffer for Vulkan
+		CreateGeometryBuffer(geometry.data(), geometry.size());
 	}
 
 	void CreateGeometryBuffer(const void* data, unsigned int sizeInBytes)
