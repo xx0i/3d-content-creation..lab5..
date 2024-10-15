@@ -204,8 +204,8 @@ private:
 
 		geometry.resize(totalSize);
 
-		std::memcpy(geometry.data(), posData, posDataSize);
-		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
+		std::memcpy(geometry.data(), indexData, indexDataSize);
+		std::memcpy(geometry.data() + indexDataSize, posData, posDataSize);
 
 		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
