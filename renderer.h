@@ -922,6 +922,9 @@ public:
 
 		interfaceProxy.InverseF(viewCopy, viewMatrix);
 		shaderVarsUniformBuffer.viewMatrix = viewMatrix;
+
+		shaderVarsUniformBuffer.camPos = viewMatrix.row4;
+
 		GvkHelper::write_to_buffer(device, uniformBufferData[currentImage], &shaderVarsUniformBuffer, sizeof(shaderVars));
 		startTime = std::chrono::high_resolution_clock::now();
 	}
