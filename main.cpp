@@ -7,6 +7,10 @@
 #define GATEWARE_DISABLE_GDIRECTX12SURFACE // we have another template for this
 #define GATEWARE_DISABLE_GRASTERSURFACE // we have another template for this
 #define GATEWARE_DISABLE_GOPENGLSURFACE // we have another template for this
+
+#define GATEWARE_ENABLE_MATH 
+#define GATEWARE_ENABLE_INPUT
+
 // With what we want & what we don't defined we can include the API
 #include "Gateware.h"
 #include "FileIntoString.h"
