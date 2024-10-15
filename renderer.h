@@ -218,6 +218,12 @@ private:
 		const float* posData = reinterpret_cast<const float*>(
 			&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
+		// Debugging: Print raw position data from the GLTF buffer
+		std::cout << "Raw Position Data:\n";
+		for (size_t i = 0; i < accessPos.count * 3; ++i) {
+			std::cout << "Data[" << i << "]: " << reinterpret_cast<const float*>(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset])[i] << "\n";
+		}
+
 		// Index data
 		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
 		const tinygltf::BufferView& bufferViewIndices = model.bufferViews[accessIndices.bufferView];
@@ -245,10 +251,10 @@ private:
 		// Print vertex data (assuming 3 floats per vertex)
 		unsigned int vertexCount = posDataSize / sizeof(float) / 3;
 		for (size_t i = 0; i < vertexCount; i++) {
-			std::cout << "Vertex " << i << ": ("
-				<< geometry[i * 3] << ", "
-				<< geometry[i * 3 + 1] << ", "
-				<< geometry[i * 3 + 2] << ")\n";
+			float x = *reinterpret_cast<float*>(geometry.data() + i * sizeof(float) * 3);
+			float y = *reinterpret_cast<float*>(geometry.data() + i * sizeof(float) * 3 + sizeof(float));
+			float z = *reinterpret_cast<float*>(geometry.data() + i * sizeof(float) * 3 + sizeof(float) * 2);
+			std::cout << "Vertex " << i << ": (" << x << ", " << y << ", " << z << ")\n";
 		}
 
 		// Print index data
