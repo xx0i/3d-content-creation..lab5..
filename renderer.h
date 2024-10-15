@@ -554,34 +554,62 @@ private:
 
 	std::vector<VkVertexInputBindingDescription> CreateVkVertexInputBindingDescriptionArray() //part b4
 	{
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Accessor& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+		const tinygltf::Accessor& normAccessor = model.accessors[primitive.attributes.at("NORMAL")];
+		const tinygltf::Accessor& texAccessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+		const tinygltf::Accessor& tanAccessor = model.accessors[primitive.attributes.at("TANGENT")];
 
 		std::vector<VkVertexInputBindingDescription> retval = {};
 
 		VkVertexInputBindingDescription bind0 = {}; //positions (3)
 		bind0.binding = 0;
-		bind0.stride = sizeof(float) * 3;
+		bind0.stride = getStrideGltf(posAccessor);
 		bind0.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		retval.push_back(bind0);
 
 		VkVertexInputBindingDescription bind1 = {}; //normals (3)
 		bind1.binding = 1;
-		bind1.stride = sizeof(float) * 3;
+		bind1.stride = getStrideGltf(normAccessor);
 		bind1.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		retval.push_back(bind1);
 
 		VkVertexInputBindingDescription bind2 = {}; //uvs (2)
 		bind2.binding = 2;
-		bind2.stride = sizeof(float) * 2;
+		bind2.stride = getStrideGltf(texAccessor);
 		bind2.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		retval.push_back(bind2);
 
 		VkVertexInputBindingDescription bind3 = {}; //tangents (4)
 		bind3.binding = 3;
-		bind3.stride = sizeof(float) * 4;
+		bind3.stride = getStrideGltf(tanAccessor);
 		bind3.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		retval.push_back(bind3);
 
 		return retval;
+	}
+
+	uint32_t getStrideGltf(const::tinygltf::Accessor& accessor)
+	{
+		uint32_t stride{};
+		if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
+		{
+			switch (accessor.type)
+			{
+			case TINYGLTF_TYPE_VEC2:
+				stride = sizeof(float) * 2;
+				break;
+			case TINYGLTF_TYPE_VEC3:
+				stride = sizeof(float) * 3;
+				break;
+			case TINYGLTF_TYPE_VEC4:
+				stride = sizeof(float) * 4;
+				break;
+			default:
+				break;
+			}
+		}
+		return stride;
 	}
 
 	VkPipelineVertexInputStateCreateInfo CreateVkPipelineVertexInputStateCreateInfo(
