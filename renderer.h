@@ -220,8 +220,11 @@ private:
 		unsigned int tanDataSize = bufferViewTan.byteLength;
 
 		unsigned int totalSize = posDataSize + normDataSize + texDataSize + tanDataSize + indexDataSize;
-		
-		unsigned int me = model.buffers[0].data.size();
+	
+		if (!totalSize % 4 == 0)
+		{
+			totalSize += totalSize % 4;
+		}
 
 		geometry.resize(totalSize);
 
