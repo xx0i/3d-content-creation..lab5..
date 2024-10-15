@@ -183,11 +183,29 @@ private:
 	void InitializeGeometryBuffer()
 	{
 		//vertex data
-		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0]; //position data
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 		const float* posData = reinterpret_cast<const float*> 
 			(& model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
+
+		//normal data
+		const tinygltf::Accessor& accessNorm = model.accessors[primitive.attributes.at("NORMAL")];
+		const tinygltf::BufferView& bufferViewNorm = model.bufferViews[accessNorm.bufferView];
+		const float* normData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewNorm.buffer].data[bufferViewNorm.byteOffset + accessNorm.byteOffset]);
+
+		//texcoord data
+		const tinygltf::Accessor& accessTex = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+		const tinygltf::BufferView& bufferViewTex = model.bufferViews[accessTex.bufferView];
+		const float* texData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewTex.buffer].data[bufferViewTex.byteOffset + accessTex.byteOffset]);
+
+		//tangent data
+		const tinygltf::Accessor& accessTan = model.accessors[primitive.attributes.at("TANGENT")];
+		const tinygltf::BufferView& bufferViewTan = model.bufferViews[accessTan.bufferView];
+		const float* tanData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewTan.buffer].data[bufferViewTan.byteOffset + accessTan.byteOffset]);
 
 		//index data
 		const tinygltf::Accessor& accessIndices = model.accessors[primitive.indices];
@@ -197,13 +215,19 @@ private:
 			
 		unsigned int indexDataSize = bufferViewIndices.byteLength;
 		unsigned int posDataSize = bufferViewPos.byteLength;
+		unsigned int normDataSize = bufferViewNorm.byteLength;
+		unsigned int texDataSize = bufferViewTex.byteLength;
+		unsigned int tanDataSize = bufferViewTan.byteLength;
 
-		unsigned int totalSize = posDataSize + indexDataSize;
+		unsigned int totalSize = posDataSize + normDataSize + texDataSize + tanDataSize + indexDataSize;
 
 		geometry.resize(totalSize);
 
 		std::memcpy(geometry.data(), posData, posDataSize);
-		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
+		std::memcpy(geometry.data() + posDataSize, normData, normDataSize);
+		std::memcpy(geometry.data() + posDataSize + normDataSize, texData, texDataSize);
+		std::memcpy(geometry.data() + posDataSize + normDataSize + texDataSize, tanData, tanDataSize);
+		std::memcpy(geometry.data() + posDataSize + normDataSize + texDataSize + tanDataSize, indexData, indexDataSize);
 
 		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
@@ -813,12 +837,49 @@ private:
 
 	void BindVertexBuffers(VkCommandBuffer& commandBuffer) //updated in part b2
 	{
-		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0]; //position data
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
+		const float* posData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
+		unsigned int posDataSize = bufferViewPos.byteLength;
 
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
+		//normal data
+		const tinygltf::Accessor& accessNorm = model.accessors[primitive.attributes.at("NORMAL")];
+		const tinygltf::BufferView& bufferViewNorm = model.bufferViews[accessNorm.bufferView];
+		const float* normData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewNorm.buffer].data[bufferViewNorm.byteOffset + accessNorm.byteOffset]);
+		unsigned int normDataSize = bufferViewNorm.byteLength;
+
+		//texcoord data
+		const tinygltf::Accessor& accessTex = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+		const tinygltf::BufferView& bufferViewTex = model.bufferViews[accessTex.bufferView];
+		const float* texData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewTex.buffer].data[bufferViewTex.byteOffset + accessTex.byteOffset]);
+		unsigned int texDataSize = bufferViewTex.byteLength;
+
+		//tangent data
+		const tinygltf::Accessor& accessTan = model.accessors[primitive.attributes.at("TANGENT")];
+		const tinygltf::BufferView& bufferViewTan = model.bufferViews[accessTan.bufferView];
+		const float* tanData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewTan.buffer].data[bufferViewTan.byteOffset + accessTan.byteOffset]);
+		unsigned int tanDataSize = bufferViewTan.byteLength;
+
+		//position
+		VkDeviceSize offsets0[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets0);
+
+		//normal
+		VkDeviceSize offsets1[] = { posDataSize };
+		vkCmdBindVertexBuffers(commandBuffer, 1, 1, &geometryHandle, offsets1);
+		
+		//texturecoord
+		VkDeviceSize offsets2[] = { posDataSize + normDataSize };
+		vkCmdBindVertexBuffers(commandBuffer, 2, 1, &geometryHandle, offsets2);
+
+		//tangent
+		VkDeviceSize offsets3[] = { posDataSize + normDataSize + tanDataSize };
+		vkCmdBindVertexBuffers(commandBuffer, 3, 1, &geometryHandle, offsets3);
 	}
 
 	void BindIndexBuffers(VkCommandBuffer& commandBuffer) //part b2
@@ -831,10 +892,30 @@ private:
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 		const float* posData = reinterpret_cast<const float*>
 			(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
-
 		unsigned int posDataSize = bufferViewPos.byteLength;
 
-		VkDeviceSize indexOffset = posDataSize;
+		//normal data
+		const tinygltf::Accessor& accessNorm = model.accessors[primitive.attributes.at("NORMAL")];
+		const tinygltf::BufferView& bufferViewNorm = model.bufferViews[accessNorm.bufferView];
+		const float* normData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewNorm.buffer].data[bufferViewNorm.byteOffset + accessNorm.byteOffset]);
+		unsigned int normDataSize = bufferViewNorm.byteLength;
+
+		//texcoord data
+		const tinygltf::Accessor& accessTex = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+		const tinygltf::BufferView& bufferViewTex = model.bufferViews[accessTex.bufferView];
+		const float* texData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewTex.buffer].data[bufferViewTex.byteOffset + accessTex.byteOffset]);
+		unsigned int texDataSize = bufferViewTex.byteLength;
+
+		//tangent data
+		const tinygltf::Accessor& accessTan = model.accessors[primitive.attributes.at("TANGENT")];
+		const tinygltf::BufferView& bufferViewTan = model.bufferViews[accessTan.bufferView];
+		const float* tanData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewTan.buffer].data[bufferViewTan.byteOffset + accessTan.byteOffset]);
+		unsigned int tanDataSize = bufferViewTan.byteLength;
+
+		VkDeviceSize indexOffset = posDataSize + normDataSize + texDataSize + tanDataSize;
 
 		VkIndexType indexType;
 		switch (accessIndicies.componentType)
