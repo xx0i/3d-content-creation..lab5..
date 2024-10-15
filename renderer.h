@@ -795,13 +795,13 @@ public:
 		VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 		SetUpPipeline(commandBuffer);
 
-		//vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+		//vkCmdDraw(commandBuffer, 3, 1, 0, 0) ;
 		
 		const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices]; //part b2
 		uint32_t indexCount = indexAccessor.count;
 		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
 	}
-
+	
 private:
 
 	VkCommandBuffer GetCurrentCommandBuffer()
