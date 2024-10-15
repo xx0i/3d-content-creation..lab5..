@@ -28,19 +28,13 @@ struct OUTPUT2
 cbuffer other_data
 {
     matrix worldMatrix, viewMatrix, perspectiveMatrix;
-    vector lightColour, ambientLight;
+    vector lightColour;
     vector lightDir, camPos;
 };
 
 
 OUTPUT2 main(shaderVars input : POSITION) : SV_POSITION 
-{
-    //temp hard coded data - till the texture data is used in lab 6
-    static float4 diffuse = { 0.75f, 0.75f, 0.25f, 0.0f };
-    static float4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
-    static float4 emissive = { 0.0f, 0.0f, 0.0f, 1.0f };
-    static float ns = 100.0f;
-    
+{    
     //matrix result = mul(worldMatrix, viewMatrix);
     //result = mul(result, perspectiveMatrix);
     //float4 pos = mul(float4(input.pos, 1), result);

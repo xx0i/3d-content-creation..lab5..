@@ -64,7 +64,7 @@ class Renderer
 	struct shaderVars
 	{
 		GW::MATH::GMATRIXF worldMatrix, viewMatrix, perspectiveMatrix;
-		GW::MATH::GVECTORF lightColour, ambientLight;
+		GW::MATH::GVECTORF lightColour;
 		GW::MATH::GVECTORF lightDir, camPos;
 	};
 	shaderVars shaderVarsUniformBuffer{};
@@ -77,7 +77,6 @@ class Renderer
 	//lighting information
 	GW::MATH::GVECTORF lightColour = { 0.9f, 0.9f, 1.0f, 1.0f };
 	GW::MATH::GVECTORF lightDir = { -1.0f, -1.0f, 2.0f };
-	GW::MATH::GVECTORF ambientLight = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 public:
 
@@ -98,7 +97,6 @@ public:
 		shaderVarsUniformBuffer.perspectiveMatrix = perspectiveMatrix;
 		shaderVarsUniformBuffer.lightColour = lightColour;
 		shaderVarsUniformBuffer.lightDir = lightDir;
-		shaderVarsUniformBuffer.ambientLight = ambientLight;
 
 		//controllers for camera
 		input.Create(win);
