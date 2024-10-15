@@ -63,9 +63,9 @@ class Renderer
 
 	struct shaderVars
 	{
-		GW::MATH::GMATRIXF worldMatrix;
-		GW::MATH::GMATRIXF viewMatrix;
-		GW::MATH::GMATRIXF perspectiveMatrix;
+		GW::MATH::GMATRIXF worldMatrix, viewMatrix, perspectiveMatrix;
+		GW::MATH::GVECTORF lightColour, lightDir;
+		GW::MATH::GVECTORF ambientLight, camPos;
 	};
 	shaderVars shaderVarsUniformBuffer{};
 
@@ -73,6 +73,11 @@ class Renderer
 	GW::INPUT::GInput input;
 	GW::INPUT::GController controller;
 	std::chrono::high_resolution_clock::time_point startTime;
+
+	//lighting information
+	GW::MATH::GVECTORF lightColour = { 0.9f, 0.9f, 1.0f, 1.0f };
+	GW::MATH::GVECTORF lightDir = { -1.0f, -1.0f, 2.0f };
+	GW::MATH::GVECTORF ambientLight = { 0.1f, 0.1f, 0.1f, 1.0f };
 
 public:
 
@@ -91,7 +96,10 @@ public:
 		shaderVarsUniformBuffer.viewMatrix = viewMatrix;
 		initializePerspectiveMatrix();
 		shaderVarsUniformBuffer.perspectiveMatrix = perspectiveMatrix;
-		
+		shaderVarsUniformBuffer.lightColour = lightColour;
+		shaderVarsUniformBuffer.lightDir = lightDir;
+		shaderVarsUniformBuffer.ambientLight = ambientLight;
+
 		//controllers for camera
 		input.Create(win);
 		controller.Create();
@@ -113,8 +121,7 @@ public:
 		GW::MATH::GVECTORF targetPosition = { 0.0f, 0.02f, 0.0f };
 		GW::MATH::GVECTORF upVector = { 0.0f, 1.0f, 0.0f };
 		interfaceProxy.LookAtLHF(cameraPosition, targetPosition, upVector, viewMatrix);
-		//shaderVarsUniformBuffer.viewMatrix = viewMatrix;
-		//GvkHelper::write_to_buffer(device, uniformBufferData[currentImage], &shaderVarsUniformBuffer, sizeof(shaderVars));
+		shaderVarsUniformBuffer.camPos = cameraPosition;
 	}
 
 	void initializePerspectiveMatrix()
