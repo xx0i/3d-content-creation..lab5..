@@ -221,6 +221,9 @@ private:
 
 		unsigned int totalSize = posDataSize + normDataSize + texDataSize + tanDataSize + indexDataSize;
 
+
+		unsigned int temp = model.buffers.size();
+
 		geometry.resize(totalSize);
 
 		std::memcpy(geometry.data(), posData, posDataSize);
