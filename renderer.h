@@ -865,7 +865,7 @@ public:
 
 		float yChange = 0.0f;
 		float states[6] = { 0, 0, 0, 0, 0, 0 };
-		static float cameraSpeed = 0.03f;
+		static float cameraSpeed = 1.0f;
 
 		input.GetState(G_KEY_SPACE, states[0]);
 		input.GetState(G_KEY_LEFTSHIFT, states[1]);
