@@ -22,7 +22,7 @@ float4 main(OUTPUT2 input) : SV_TARGET
     static float4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
     static float4 emissive = { 0.0f, 0.0f, 0.0f, 1.0f };
     static float4 ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
-    static float ns = 100.0f;
+    static float ns = 140.0f;
     
     
     float3 norm = normalize(input.normW);
