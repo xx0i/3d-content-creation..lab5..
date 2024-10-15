@@ -441,25 +441,32 @@ private:
 		VkPipelineInputAssemblyStateCreateInfo assembly_create_info = CreateVkPipelineInputAssemblyStateCreateInfo();
 		std::vector<VkVertexInputBindingDescription> vertex_binding_description = CreateVkVertexInputBindingDescriptionArray();
 
+		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
+		const tinygltf::Accessor& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+		const tinygltf::Accessor& normAccessor = model.accessors[primitive.attributes.at("NORMAL")];
+		const tinygltf::Accessor& texAccessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+		const tinygltf::Accessor& tanAccessor = model.accessors[primitive.attributes.at("TANGENT")];
+
+
 		std::array<VkVertexInputAttributeDescription, 4> vertex_attribute_description;
 		vertex_attribute_description[0].binding = vertex_binding_description[0].binding;
 		vertex_attribute_description[0].location = 0;
-		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT; //positions (3)
+		vertex_attribute_description[0].format = getFormatGltf(posAccessor); //positions (3)
 		vertex_attribute_description[0].offset = 0;
 
 		vertex_attribute_description[1].binding = vertex_binding_description[1].binding;
 		vertex_attribute_description[1].location = 1;
-		vertex_attribute_description[1].format = VK_FORMAT_R32G32B32_SFLOAT; //normals (3)
+		vertex_attribute_description[1].format = getFormatGltf(normAccessor); //normals (3)
 		vertex_attribute_description[1].offset = 0;
 
 		vertex_attribute_description[2].binding = vertex_binding_description[2].binding;
 		vertex_attribute_description[2].location = 2;
-		vertex_attribute_description[2].format = VK_FORMAT_R32G32_SFLOAT; //uvs (2)
+		vertex_attribute_description[2].format = getFormatGltf(texAccessor); //uvs (2)
 		vertex_attribute_description[2].offset = 0;
 
 		vertex_attribute_description[3].binding = vertex_binding_description[3].binding;
 		vertex_attribute_description[3].location = 3;
-		vertex_attribute_description[3].format = VK_FORMAT_R32G32B32A32_SFLOAT; //tangents (4)
+		vertex_attribute_description[3].format = getFormatGltf(tanAccessor); //tangents (4)
 		vertex_attribute_description[3].offset = 0;
 
 		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(vertex_binding_description.data(), vertex_binding_description.size(), vertex_attribute_description.data(), vertex_attribute_description.size());
@@ -511,6 +518,29 @@ private:
 		retval.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		retval.primitiveRestartEnable = false;
 		return retval;
+	}
+
+	VkFormat getFormatGltf(const::tinygltf::Accessor& accessor)
+	{
+		VkFormat format{};
+		if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
+		{
+			switch (accessor.type)
+			{
+			case TINYGLTF_TYPE_VEC2:
+				format = VK_FORMAT_R32G32_SFLOAT;
+				break;
+			case TINYGLTF_TYPE_VEC3:
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+				break;
+			case TINYGLTF_TYPE_VEC4:
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+				break;
+			default:
+				break;
+			}
+		}
+		return format;
 	}
 
 	VkVertexInputBindingDescription CreateVkVertexInputBindingDescription()
