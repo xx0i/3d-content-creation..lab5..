@@ -439,15 +439,30 @@ private:
 		stage_create_info[1].pName = "main";
 
 		VkPipelineInputAssemblyStateCreateInfo assembly_create_info = CreateVkPipelineInputAssemblyStateCreateInfo();
-		VkVertexInputBindingDescription vertex_binding_description = CreateVkVertexInputBindingDescription();
+		std::vector<VkVertexInputBindingDescription> vertex_binding_description = CreateVkVertexInputBindingDescriptionArray();
 
-		std::array<VkVertexInputAttributeDescription,1> vertex_attribute_description;
-		vertex_attribute_description[0].binding = 0;
+		std::vector<VkVertexInputAttributeDescription> vertex_attribute_description;
+		vertex_attribute_description[0].binding = vertex_binding_description[0].binding;
 		vertex_attribute_description[0].location = 0;
 		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT; //part b3
 		vertex_attribute_description[0].offset = 0;
 
-		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description.data(), vertex_attribute_description.size());
+		vertex_attribute_description[1].binding = vertex_binding_description[0].binding;
+		vertex_attribute_description[1].location = 0;
+		vertex_attribute_description[1].format = VK_FORMAT_R32G32B32_SFLOAT; //part b3
+		vertex_attribute_description[1].offset = 0;
+
+		vertex_attribute_description[2].binding = vertex_binding_description[0].binding;
+		vertex_attribute_description[2].location = 0;
+		vertex_attribute_description[2].format = VK_FORMAT_R32G32B32_SFLOAT; //part b3
+		vertex_attribute_description[2].offset = 0;
+
+		vertex_attribute_description[3].binding = vertex_binding_description[0].binding;
+		vertex_attribute_description[3].location = 0;
+		vertex_attribute_description[3].format = VK_FORMAT_R32G32B32_SFLOAT; //part b3
+		vertex_attribute_description[3].offset = 0;
+
+		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(vertex_binding_description.data(), vertex_binding_description.size(), vertex_attribute_description.data(), vertex_attribute_description.size());
 		VkViewport viewport = CreateViewportFromWindowDimensions();
 		VkRect2D scissor = CreateScissorFromWindowDimensions();
 		VkPipelineViewportStateCreateInfo viewport_create_info = CreateVkPipelineViewportStateCreateInfo(&viewport, 1, &scissor, 1);
@@ -504,6 +519,38 @@ private:
 		retval.binding = 0;
 		retval.stride = sizeof(float) * 3; //part b3
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		return retval;
+	}
+
+	std::vector<VkVertexInputBindingDescription> CreateVkVertexInputBindingDescriptionArray() //part b4
+	{
+
+		std::vector<VkVertexInputBindingDescription> retval = {};
+
+		VkVertexInputBindingDescription bind0 = {}; //positions (3)
+		retval[0].binding = 0;
+		retval[0].stride = sizeof(float) * 3;
+		retval[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	
+
+		VkVertexInputBindingDescription bind1 = {}; //normals (3)
+		retval[1].binding = 1;
+		retval[1].stride = sizeof(float) * 3;
+		retval[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	
+
+		VkVertexInputBindingDescription bind2 = {}; //uvs (2)
+		retval[2].binding = 2;
+		retval[2].stride = sizeof(float) * 2;
+		retval[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+
+		VkVertexInputBindingDescription bind3 = {}; //tangents (4)
+		retval[3].binding = 3;
+		retval[3].stride = sizeof(float) * 4;
+		retval[3].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+
 		return retval;
 	}
 
