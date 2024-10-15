@@ -563,7 +563,7 @@ private:
 		retval.polygonMode = VK_POLYGON_MODE_FILL;
 		retval.lineWidth = 1.0f;
 		retval.cullMode = VK_CULL_MODE_BACK_BIT;
-		retval.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		retval.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		retval.depthClampEnable = VK_FALSE;
 		retval.depthBiasEnable = VK_FALSE;
 		retval.depthBiasClamp = 0.0f;
@@ -714,8 +714,7 @@ private:
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 
-		VkDeviceSize vertexOffset = bufferViewPos.byteOffset;
-		VkDeviceSize offsets[] = { /*vertexOffset*/0 };
+		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
@@ -732,7 +731,7 @@ private:
 
 		unsigned int posDataSize = bufferViewPos.byteLength;
 
-		VkDeviceSize indexOffset =/*bufferViewIndicies.byteOffset*/posDataSize;
+		VkDeviceSize indexOffset = posDataSize;
 
 		VkIndexType indexType;
 		switch (accessIndicies.componentType)
