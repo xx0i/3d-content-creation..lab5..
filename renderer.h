@@ -204,8 +204,8 @@ private:
 
 		geometry.resize(totalSize);
 
-		std::memcpy(geometry.data(), indexData, indexDataSize);
-		std::memcpy(geometry.data() + indexDataSize, posData, posDataSize);
+		std::memcpy(geometry.data(), posData, posDataSize);
+		std::memcpy(geometry.data() + posDataSize, indexData, indexDataSize);
 
 		CreateGeometryBuffer(&geometry[0], geometry.size());
 	}
@@ -715,7 +715,7 @@ private:
 		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
 
 		VkDeviceSize vertexOffset = bufferViewPos.byteOffset;
-		VkDeviceSize offsets[] = { vertexOffset };
+		VkDeviceSize offsets[] = { /*vertexOffset*/0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
@@ -724,8 +724,15 @@ private:
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
 		const tinygltf::Accessor& accessIndicies = model.accessors[primitive.indices];
 		const tinygltf::BufferView& bufferViewIndicies = model.bufferViews[accessIndicies.bufferView];
+	
+		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
+		const tinygltf::BufferView& bufferViewPos = model.bufferViews[accessPos.bufferView];
+		const float* posData = reinterpret_cast<const float*>
+			(&model.buffers[bufferViewPos.buffer].data[bufferViewPos.byteOffset + accessPos.byteOffset]);
 
-		VkDeviceSize indexOffset = bufferViewIndicies.byteOffset;
+		unsigned int posDataSize = bufferViewPos.byteLength;
+
+		VkDeviceSize indexOffset =/*bufferViewIndicies.byteOffset*/posDataSize;
 
 		VkIndexType indexType;
 		switch (accessIndicies.componentType)
