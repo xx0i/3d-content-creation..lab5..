@@ -1,5 +1,5 @@
 // an ultra simple hlsl vertex shader
-struct shaderVars
+struct shaderVars //part b4
 {
     float3 position : POSITION;
 };

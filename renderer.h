@@ -53,10 +53,6 @@ class Renderer
 	std::vector<VkBuffer> storageBufferHandle;
 	std::vector<VkDeviceMemory> storageBufferData;
 
-	struct shaderVars
-	{
-		float posX, posY, posZ; //only dealing with position rn
-	};
 	std::vector<uint8_t> geometry{};
 
 public:
@@ -127,7 +123,7 @@ public:
 		}
 	}
 
-	void createDescriptorLayout()
+	void createDescriptorLayout() //part b1
 	{
 		VkDescriptorSetLayoutBinding uniformBinding = {};
 		uniformBinding.binding = 0;
@@ -182,6 +178,7 @@ private:
 		vlk.GetRenderPass((void**)&renderPass);
 	}
 
+	//part b1
 	void InitializeGeometryBuffer()
 	{
 		//vertex data
@@ -446,7 +443,7 @@ private:
 		std::array<VkVertexInputAttributeDescription,1> vertex_attribute_description;
 		vertex_attribute_description[0].binding = 0;
 		vertex_attribute_description[0].location = 0;
-		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+		vertex_attribute_description[0].format = VK_FORMAT_R32G32B32_SFLOAT; //part b3
 		vertex_attribute_description[0].offset = 0;
 
 		VkPipelineVertexInputStateCreateInfo input_vertex_info = CreateVkPipelineVertexInputStateCreateInfo(&vertex_binding_description, 1, vertex_attribute_description.data(), vertex_attribute_description.size());
@@ -504,7 +501,7 @@ private:
 	{
 		VkVertexInputBindingDescription retval = {};
 		retval.binding = 0;
-		retval.stride = sizeof(float) * 3;
+		retval.stride = sizeof(float) * 3; //part b3
 		retval.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return retval;
 	}
@@ -563,7 +560,7 @@ private:
 		retval.polygonMode = VK_POLYGON_MODE_FILL;
 		retval.lineWidth = 1.0f;
 		retval.cullMode = VK_CULL_MODE_BACK_BIT;
-		retval.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		retval.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; //part b5
 		retval.depthClampEnable = VK_FALSE;
 		retval.depthBiasEnable = VK_FALSE;
 		retval.depthBiasClamp = 0.0f;
@@ -669,7 +666,7 @@ public:
 
 		//vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 		
-		const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices];
+		const tinygltf::Accessor& indexAccessor = model.accessors[model.meshes[0].primitives[0].indices]; //part b2
 		uint32_t indexCount = indexAccessor.count;
 		vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
 	}
@@ -708,7 +705,7 @@ private:
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void BindVertexBuffers(VkCommandBuffer& commandBuffer)
+	void BindVertexBuffers(VkCommandBuffer& commandBuffer) //updated in part b2
 	{
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
 		const tinygltf::Accessor& accessPos = model.accessors[primitive.attributes.at("POSITION")];
@@ -718,7 +715,7 @@ private:
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &geometryHandle, offsets);
 	}
 
-	void BindIndexBuffers(VkCommandBuffer& commandBuffer)
+	void BindIndexBuffers(VkCommandBuffer& commandBuffer) //part b2
 	{
 		const tinygltf::Primitive& primitive = model.meshes[0].primitives[0];
 		const tinygltf::Accessor& accessIndicies = model.accessors[primitive.indices];
