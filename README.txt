@@ -1,3 +1,5 @@
+*Multiple Starting Files and helper functions were created by Lari Norri at Full Sail University*
+
 To access your assignment double-click "CreateSolution.bat"
 The first time you compile your code you will be prompted to login to GitHub.
 All new source code should be created in this folder.
